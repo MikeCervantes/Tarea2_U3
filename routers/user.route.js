@@ -19,8 +19,8 @@ module.exports = (wagner) => {
     router.get('/:id', (req, res) =>
         userCtrl.findByID(req, res));
 
-    router.get('/:email/:password', (req, res) =>
-        userCtrl.findLogin(req, res));
-    return router;
+    router.get('/login/:email/:password', (req, res) =>
+        userCtrl.login(req, res));
 
+    return router;
 }

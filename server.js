@@ -3,6 +3,8 @@ const express = require('express');
 const morgan = require('morgan');
 const wagner = require('wagner-core');
 const path = require('path');
+const _config = require('./_config');
+const expressJWT = require('express-jwt');
 
 let app = express();
 
@@ -21,10 +23,26 @@ app.use(function(req,res,next){
 
 const urlBase = "/api/v1/";
 
-const user = require('./routers/user.router')(wagner);
-const brand = require('./routers/brand.router')(wagner);
+const jwtOptions={
+    path:[/^\/api\/v1\/usuarios\/login\/.*/]
+}
+
+app.use(expressJWT({secret:_config.SECRETJWT}).unless(jwtOptions));
+
+app.use(function(err,req,res,next){
+    if(err.name=='UnauthorizedError'){
+        res.status(err.status).send({
+            code:err.status,
+            message:err.message,
+            details:err.code
+        });
+    }else{
+        next();
+    }
+});
+
+const user = require('./routers/user.route')(wagner);
 
 app.use(urlBase+'usuarios',user);
-app.use(urlBase+'brands',brand);
 
 module.exports = app;

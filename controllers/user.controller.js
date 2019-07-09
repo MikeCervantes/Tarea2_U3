@@ -1,9 +1,36 @@
 const http = require('http');
 const path = require('path');
 const status = require('http-status');
-
+const jwt=require('jsonwebtoken');
+const _config=require('../_config');
 
 let _user;
+
+const login=(req,res)=>{
+    const {email,password}=req.params;
+    let query={email:email,password:password};
+    _user.findOne(query,"-password")
+        .then((user)=>{
+            if(user){
+                const token=jwt.sign({email:email},_config.SECRETJWT);
+                res.status(status.OK);
+                res.json({
+                    msg:"Acceso exitoso",
+                    data:{
+                        user:user,
+                        token:token
+                    }
+                });
+            }else{
+                res.status(status.NOT_FOUND);
+                res.json({msg:"Error!!! No se encontró"});
+            }
+        })
+        .catch((err)=>{
+            res.status(status.NOT_FOUND);
+            res.json({msg:"Error!!! No se encontró"});
+        })
+}
 
 const createUser = (req, res) => {
     const user = req.body;
@@ -57,7 +84,7 @@ const findByID = (req, res) => {
         });
 };
 
-const findLogin = (req, res) => {
+/*const findLogin = (req, res) => {
     const { email,password } = req.params;
     //const id = req.params.id;
     const params = {
@@ -78,7 +105,7 @@ const findLogin = (req, res) => {
             res.status(status.NO_CONTENT);
             res.json({ msg: "Error!!!" });
         });
-};
+};*/
 
 const deleteByID = (req, res) => {
     const { id } = req.params;
@@ -124,6 +151,6 @@ module.exports = (User) => {
         deleteByID,
         updateByID,
         findByID,
-        findLogin
+        login
     });
 }
